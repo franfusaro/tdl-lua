@@ -1,0 +1,452 @@
+Cada pieza que ejecuta lua es un chunk. Un chunk es una secuencia de statements.
+Se puede usar punto y coma al final de cada statement pero no es necesario.
+Tiene un interprete interactivo.
+Pueden ejecutarse distintos archivos donde se definan chunks. Por ejemplo, un archivo a que tenga x=1 y uno b que tenga print(x) serian validos para ejecutarse como lua -la -lb e imprimiria 1.
+Se puede tambien hacer dofile(filename) para cargar una libreria en el interprete (permite testear chunks facilmente).
+Las variables globales no necesitan declaracion. Acceder a una variable no declarada da nil.
+Lua es case sensitive, por ejemplo and es reservado pero And y AND no.
+Comentarios con --[[ y ]]--
+Tiene tipado dinamico (no hay definiciones de tipo, cada valor tiene su propio tipo). 
+El tipo number represetnta numeros reales (floats de doble precision)
+El tipo string puede contener cualquier caracter (con cualq. valor numerico) por lo que puede contener data binaria. También son valores inmutables, no podes cambiar un caracter adentro de un string (como si podrias en C) por lo que al intentarlo se crea otro string. Tienen la ventaja agregada de que su memoria es manejada automaticamente.
+Los strings pueden comenzar con ", ' o [[, siendo este ultimo el que no tiene en cuenta caracteres de escape ni.
+saltos del inea.
+Strings se concatenan con ..
+El tipo tabla esta implementado con arrays asociativos (pueden tener cualquier cosa como indice). y son dinamicas y son la unica estructura de datos. Estas son objetos a los cuales se mantienen referencias.
+Para representar records se pueden usar tablas y su azucar sintactico dice que a["x"] es igual a hacer a.x
+Los arrays empiezan en 1 (!!!!!!!!!!!!)
+Las funciones son valores de primera clase por lo que se las puede guardar en variables y pasarlas como argumentos a otras funciones (tambien retornarlas desde funciones). 
+Userdata: Permite guardar data arbitraria de C. Solo asignacion y equality test. Se utilizan para representar nuevos tipos creados por un programa/lib escrita en C.
+
+Para negar equality se usa "~="
+Lua compara tables, userdata, and functions por referencia.
+
+El operador "and" devuelve el primer argumento si es falso y el segundo si es verdadero.
+El operador "or" devuelve el primer argumento si es verdadero y el segundo si es falso.
+Ejemplos:
+    print(4 and 5)         --> 5
+    print(nil and 13)      --> nil
+    print(false and 13)    --> false
+    print(4 or 5)          --> 4
+    print(false or 5)      --> 5
+Ambos usan short-cut evaluation (solo evaluan el segundo si es necesario).
+
+Mas azucar sintactico:
+"x = x or v" equivale a "if not x then x = v end" i.e., settea x a un valor por defecto v cuando no esta seteado (y no sea falso).
+"(a and b) or c" equivale a (en C) "a ? b : c" (operador ternario) siempre y cuando b no sea falso.
+Esto nos permite algunas facilidades como: "max = (x > y) and x or y"
+El operador "not" siempre devuelve true o false.
+
+Precedencia de operadores:
+Higher
+^
+not  - (unary)
+*   /
++   -
+..
+<   >   <=  >=  ~=  ==
+and
+or
+Lower
+
+Las tablas pueden tener distintos constructores:
+vacio: {}
+como lista: {"Sunday", "Saturday"}
+con valores iniciales para los indices: {x=0, y=0}
+mixto: {color="blue", thickness=2, npoints=4,
+         {x=0,   y=0},
+         {x=-10, y=0},
+         {x=-10, y=1},
+         {x=0,   y=1}
+       }
+Estos tienen limitaciones, por eso se usa de manera mas generica con []:
+opnames = {["+"] = "add", ["-"] = "sub",
+               ["*"] = "mul", ["/"] = "div"}
+    
+    i = 20; s = "-"
+    a = {[i+0] = s, [i+1] = s..s, [i+2] = s..s..s}
+    
+    print(opnames[s])    --> sub
+    print(a[22])         --> ---
+
+3. Statements:
+Asignaciones.
+Lua permite asignaciones multiples.
+a, b = 10, 2*x
+
+Para esto, primero evalua los valores y luego ejecuta, por lo que se puede facilitar el swap como:
+x, y = y, x
+Cuidado con esto, siempre se asigna un valor a cada variable, por lo que lo siguiente:
+a, b, c = 0 solo pondra a = 0 mientras que b y c seran nil.
+Un uso comun es obtener returns de funciones.
+
+Local Variables and Blocks
+Existe el identificador "local" para las variables que quedan dentro del scope del bloque donde estan declaradas. Su acceso es mas rapido que a las globales.
+
+4. Control Structures
+if, elseif y else ... end
+while ... end
+repeat ... until
+for ... end
+	dos variantes del for
+	for numerico:
+	for var=exp1, exp2, exp3 do ... end
+	Ejecuta algo para cada valor desde exp1 a exp2 usando exp3 como step. Estas expresiones solo se evaluan una vez al comienzo del loop. La variable "var" es local implicitamente.
+	
+	for generico:
+	for i,v in ipairs(a) do ... end
+	Recorre todos los valores devueltos por un iterador. i obtiene el indice y v el valor asociado.
+
+	
+Break and Return
+
+5. Functions
+Las funciones son el principal mecanismo de abstraccion de statments. Estas pueden llevar a cabo una tarea específica (lo que a veces se llama procedimiento o subrutina en otros idiomas) o calcular y devolver valores. En el primer caso son statements, en el segundo caso son expresiones.
+Si tienen un solo argumento se pueden obviar los parentesis.
+También, azucar sintactico, para object oriented calls se puede hacer o:foo(x) en lugar de o.foo(o, x)
+Las funciones pueden estar definidas en Lua o en C (no hay diferencia al llamarlas).
+Lua permite utilizar las llamadas a las funciones sin pasar todos los parametros (y si pasamos parametros de mas los descarta). Por ejemplo, si tenemos:
+f(a, b) return a or b end
+Podemos realizar las siguientes llamadas
+f(3) --> a = 3, b = nil
+f(3,4) --> a = 3, b = 4
+f(3, 4, 5) --> a = 3, b = 4 (descarta 5)
+Esto es util para parametros por defecto.
+
+Resultados multiples.
+Se pueden devolver multiples valores de una función y asignarlos en una sola linea. Ejemplo:
+s, e = string.find("hello Lua users", "Lua")
+Siempre se ajusta el numero de resultados dependiendo de como se use la funcion: 
+	Si se usa como statement, se descartan los resultados.
+	Si se usa como expresion, se utiliza solo el primero.
+	Si devuelve menos parametros de los esperados, produce nils.
+	Si devuelve mas parametros de los esperados, los descarta.
+Ejemplos:
+    function foo0 () end                  -- returns no results
+    function foo1 () return 'a' end       -- returns 1 result
+    function foo2 () return 'a','b' end   -- returns 2 results
+
+    x,y = foo2()        -- x='a', y='b'
+    x = foo2()          -- x='a', 'b' is discarded
+    x,y,z = 10,foo2()   -- x=10, y='a', z='b'
+    x,y = foo0()      -- x=nil, y=nil
+    x,y = foo1()      -- x='a', y=nil
+    x,y,z = foo2()    -- x='a', y='b', z=nil
+
+Una llamada que no es el ultimo elemento en una lista siempre devuelve un valor:
+    x,y = foo2(), 20      -- x='a', y=20
+    x,y = foo0(), 20, 30  -- x=nil, y=20, 30 is discarded
+
+Cuando una funcion es el ultimo o el unico argumento para otra funcion, todos los resultados del primero van como parametros del que la llama:
+    print(foo0())          -->
+    print(foo1())          -->  a
+    print(foo2())          -->  a   b
+    print(foo2(), 1)       -->  a   1
+
+Los constructores obtienen todos los resultados de la llamada si es la ultima de la lista, si no solo un resultado:
+    a = {foo0()}         -- a = {}  (an empty table)
+    a = {foo1()}         -- a = {'a'}
+    a = {foo2()}         -- a = {'a', 'b'}
+    a = {foo0(), foo2(), 4}   -- a[1] = nil, a[2] = 'a', a[3] = 4
+
+Finalmente, hacer return f() devuelve todos los valores de f:
+    function foo (i)
+      if i == 0 then return foo0()
+      elseif i == 1 then return foo1()
+      elseif i == 2 then return foo2() 
+      end
+    end
+    
+    print(foo(1))     --> a
+    print(foo(2))     --> a  b
+    print(foo(0))     -- (no results)
+    print(foo(3))     -- (no results)
+
+Mas azucar sintactico, si hago return (f()) solo devuelvo un valor.
+
+Funcion util: unpack. Recibe array y devuelve los valores. Esto sirve para funciones que reciban una cantidad de parametros de manera dinamica.
+Ejemplo:
+f = string.find
+a = {"hello", "ll"}
+
+Argumentos de tamaño variable
+Se pueden especificar con "..." como parametro (Ej: print (...)). 
+
+Hay que hacer local arg = {...}
+
+Argumentos con nombre
+Para esto, en Lua se pueden redefinir las funciones para que reciban un solo parametro (una tabla) con los nombres de los argumentos que queremos.
+Por ejemplo:
+    rename{old="temp.lua", new="temp1.lua"}
+
+    function rename (arg)
+      return os.rename(arg.old, arg.new)
+    end
+
+Esto es útil cuando la función tiene muchos parametros y la mayoría son opcionales.
+Las funciones son de primer clase, anonimas y tienen lexical scoping (pueden acceder a variables de las funciones que las contienen por lo que permite lambdas).
+También son funciones de higher-order cuando reciben otra función como argumento.
+Por ejemplo, las tables permiten el sorting recibiendo una función anonima como parametro que es la comparación entre dos de los elementos a comparar. 
+Ejemplo:
+     network = {
+       {name = "grauna",  IP = "210.26.30.34"},
+       {name = "arraial", IP = "210.26.30.23"},
+       {name = "lua",     IP = "210.26.23.12"},
+       {name = "derain",  IP = "210.26.23.20"},
+     }
+    table.sort(network, function (a,b)
+      return (a.name > b.name)
+    end)
+
+Clausuras.
+
+Ejemplos:
+    names = {"Peter", "Paul", "Mary"}
+    grades = {Mary = 10, Paul = 7, Peter = 8}
+    table.sort(names, function (n1, n2)
+      return grades[n1] > grades[n2]    -- compare the grades
+    end)
+
+    function sortbygrade (names, grades)
+      table.sort(names, function (n1, n2)
+        return grades[n1] > grades[n2]    -- compare the grades
+      end)
+    end
+
+Toman los valores de variables fuera del scope, estas se consideran "upvalues" o "external local variables".
+Ejemplo del contador:
+function newCounter ()
+	local i = 0
+	return function ()   -- anonymous function
+	       i = i + 1
+	       return i
+	     end
+end
+
+c1 = newCounter()
+print(c1())  --> 1
+print(c1())  --> 2
+c2 = newCounter()
+print(c2())  --> 1
+print(c1())  --> 3
+print(c2())  --> 2
+
+Se dice que c1 y c2 son clausuras diferentes de la misma funcion y cada una actua sobre una variable local i independiente.
+Esto puede ser útil para redefinir funciones.
+Ejemplo el sin está en radianes y lo quiero en grados.
+do
+	local oldSin = math.sin
+	local k = math.pi/180
+	math.sin = function (x)
+	return oldSin(x*k)
+	end
+end
+
+Funciones locales.
+local function (...)
+end
+
+
+Tail calls
+Las tail calls no ocupan espacio extra en el stack (no provocan stackoverflow).
+En Lua, solo una llamada con el formato "return g(...)" es una tail call. 
+Sin embargo, g y sus argumentos pueden ser expresiones complejas dado que Lua los evalua antes de la llamada, por lo que lo siguiente es una tail call:
+      return x[i].foo(x[j] + a*b, i + j)
+Util para state machines.
+
+Iterators y closures
+Ejemplo devolver todas las palabras de un archivo
+function allwords ()
+      local line = io.read()  -- current line
+      local pos = 1           -- current position in the line
+      return function ()      -- iterator function
+        while line do         -- repeat while there are lines
+          local s, e = string.find(line, "%w+", pos)
+          if s then           -- found a word?
+            pos = e + 1       -- next position is after this word
+            return string.sub(line, s, e)     -- return the word
+          else
+            line = io.read()  -- word not found; try next line
+            pos = 1           -- restart from first position
+          end
+        end
+        return nil            -- no more lines: end of traversal
+      end
+    end
+
+Stateless iterators
+Iterators with complex state
+
+Es lenguaje interpretado pero tiene su parte de compilación (funcion loadstring, dofile y no se que mas)
+
+Tiene función Require que primero busca el archivo en el path y luego chequea si ya fue corrido anteriormente (evita duplicar el trabajo). Este no trabaja como los require de otros lenguajes si no que lo hace mediante patterns (porque trabaja en base a ANSI C) por lo que existe una variable donde se especifican los paths con dichos patrones.
+
+Se puede incluir paquetes de C mediante la función loadlib() pero esto se tiene que especificar con codigo para cada plataforma (si es windows carga una dll, si es linux carga un .so por ejemplo) y esta función no inicializa la librería si no que nos devuelve una función de Lua para hacerlo.
+Ejemplo:
+local path = "/usr/local/lua/lib/libluasocket.so"
+-- or path = "C:\\windows\\luasocket.dll"
+local f = assert(loadlib(path, "luaopen_socket"))
+f()  -- actually open the library
+
+Errores
+Si se produce un error, Lua termina el chunk que se está ejecutando y retorna a la aplicación que lo este usando. También existe la función error(msg) o con assert.
+Para manejar errores lo que se puede hacer es devolver error codes (o nil).
+Otra manera: si quisieramos atrapar los errores se utilizaria la función pcall (protected call) para encapsular el código, la cual hay que ponerla dentro de un if, por ejemplo:
+
+if pcall(foo) then
+-- no errors while running `foo'
+...
+else
+-- `foo' raised an error: take appropriate actions
+...
+end
+
+Tambien se puede utilizar esto con funciones anonimas.
+Esta función devuelve true y el return de la función en caso de éxito. Si no falso y el mensaje de error.
+El problema es que esto nos destruye el stack y no nos deja hacer un traceback, para hacer traceback hay que correr una función antes (xpcall()) a la cual le pasamos un error handler y ahi en el error handler hacer algo para implementar traceback.
+
+Coroutines
+Toda la funcionalidad esta en la tabla "coroutine".
+Se crean con la función create y tienen tres estados: Suspended, running y dead. Inicialmente están en estado suspended y hay que ejecutar el resume para que pasen a running. Si tratamos de correr resume en una coroutine dead, esta nos devuelve false (corre con pcall).
+
+co = coroutine.create(function ()
+           print("hi")
+         end)    
+print(co)   --> thread: 0x8071d98
+print(coroutine.status(co))   --> suspended
+coroutine.resume(co)   --> hi
+print(coroutine.status(co))   --> dead
+
+Utilizan yield para suspenderse.
+Llamar a resume nos devuelve true y los argumentos que le pasamos al yield.
+co = coroutine.create(function (a,b)
+   coroutine.yield(a + b, a - b)
+ end)
+print(coroutine.resume(co, 20, 10))  --> true  30  10
+
+La diferencia con otros lenguajes es que Lua ofrece lo que los autores llaman "asymetric coroutines" dado que tienen una funcion para suspender y otra para resumir mientras que los demas lenguajes suelen tener "simetric coroutines" porque solo ofrecen para suspender.
+
+Las corutinas nos permiten hacer una especie de "pipes and filters" dada la propiedad de tener ambos yield y resume como posibilidades.
+Ejemplo de productor/consumidor con filtro:
+
+
+function receive(corutina)
+    local result, item = coroutine.resume(corutina)
+    return item
+end
+
+function send(item)
+    coroutine.yield(item)
+end
+
+function produceItem()
+    return io.read()
+end
+
+function filter(producer)
+    return coroutine.create(function()
+        while(true) do
+            item = receive(producer)
+            send(item + 2)
+        end
+    end)
+end
+
+function consumer(producer)
+    filter = filter(producer)
+    while(true) do
+        result, item = receive(filter)
+        print(item)
+    end
+end
+
+function producer()
+    return coroutine.create(
+        function()
+            while(true) do
+                item = produceItem()
+                send(item)
+            end
+        end
+    )
+end
+
+consumer(producer())
+
+Existe una función coroutine.wrap que lo que hace es devolvernos una función que al llamarla realizar el resume de la corutina. --> Es menos flexible que el create/resume y ademas raisea los errores en lugar de devolverlos.
+Las corutinas no pueden ser preempted!! Hay formas de evitarlo por ejemplo para descargas de archivos.
+
+Estructuras de datos hechas con tablas
+Arrays
+a = {}    -- new array
+for i=1, 1000 do
+	a[i] = 0
+end
+
+Matrices and multi dim arrays
+Dos opciones: Tabla de tablas o tabla de indice compuesto.
+Tabla de tablas
+mt = {}          -- create the matrix
+    for i=1,N do
+      mt[i] = {}     -- create a new row
+      for j=1,M do
+        mt[i][j] = 0
+      end
+    end
+
+Indice compuesto
+Sea la matriz de N*M, multiplico N por una constante y luego le sumo M y tomo eso como indice:
+mt = {}          -- create the matrix
+    for i=1,N do
+      for j=1,M do
+        mt[i*M + j] = 0
+      end
+    end
+
+No hay que preocuparse por la dispersión de la matriz dado que las tablas ya de por si son dispersas.
+
+Listas linkeadas
+    list = nil
+    list = {next = list, value = v}
+
+    local l = list
+    while l do
+      print(l.value)
+      l = l.next
+    end
+
+Colas y colas dobles
+Se pueden implementar trivialmente con insert/remove pero es mejor si mantenemos los indices first y last en variables e implementamos funciones pushleft y right y popleft y right.
+
+function ListNew ()
+      return {first = 0, last = -1}
+    end
+
+
+
+EJEMPLO PONG:
+
+Iniciar explicando ciclo de un juego. Start -> Update -> End. Explicar las funciones de love y como/porque las sobreescribimos, notar que esto es un punto a favor de la flexibilidad del lenguaje. Ejemplificar con los frames.
+
+Cada vez que tenemos una imagen o fuente se le aplica un filtro por defecto o lineal (con una funcion que se llama love.graphics.setDefaultFilter(min, mag) --> Texture scaling filter.
+
+Para ir armando el ejemplo:
+Pong-0:
+Ejemplificación con frames del ciclo del juego.
+Ejemplo de input basico de cerrar con escape o con la Q --> mostrar sintaxis del IF y el operador OR.
+Ejemplo del contador para mostrar el elseif.
+Mostrar que la concatenacion se hace con ".."
+Mencionar diferencias con otros lenguajes. (En otros lenguajes se utilizan simbolos como ||, se encierra entre parentesis, aca se usa if ... then ... end)
+
+Pong-1:
+Creacion de rectangulos
+love.graphics.rectangle(mode, x, y, width,height).
+Crear los paddles y la bola utilizando tablas con los parametros necesarios. Hacer hincapie en el uso de la tabla y su flexibilidad a la hora de definir las cosas.
+
+Pong-2:
+Movimiento de los paddles y de la bola.
+
+Pong-3:
+Encapsulamiento en clases, mostrar como funcionan las clases en Lua, explicar que son tablas como teniamos antes pero mejoran la readability (ejemplo el draw)
+
+
