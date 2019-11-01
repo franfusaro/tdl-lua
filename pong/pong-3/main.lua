@@ -118,7 +118,7 @@ end
 function detectBoundsCollisions()
     -- detect upper and lower screen boundary collision and reverse if collided
 
-    --[[ TODO ]]--
+    --[[ TODO
     if ball.y <= 0 then
         ball.y = 0
         ball.dy = -ball.dy
@@ -139,7 +139,7 @@ function detectBoundsCollisions()
         gameState = 'serve'
         ball:reset()
     end
-    --[[ ]]--
+    ]]--
 end
 
 --[[
