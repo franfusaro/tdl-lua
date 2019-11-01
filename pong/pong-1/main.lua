@@ -1,25 +1,3 @@
---[[
-    GD50 2018
-    Pong Remake
-
-    pong-2
-    "The Rectangle Update"
-
-    -- Main Program --
-
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
-
-    Originally programmed by Atari in 1972. Features two
-    paddles, controlled by players, with the goal of getting
-    the ball past your opponent's edge. First to 10 points wins.
-
-    This version is built to more closely resemble the NES than
-    the original Pong machines or the Atari 2600 in terms of
-    resolution, though in widescreen (16:9) so it looks nicer on 
-    modern systems.
-]]
-
 -- push is a library that will allow us to draw our game at a virtual
 -- resolution, instead of however large our window is; used to provide
 -- a more retro aesthetic
@@ -33,9 +11,6 @@ WINDOW_HEIGHT = 720
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
-
-    --[[ CODEAR 
--- Challenge: 
 
 PaddleDimensions = {
     width = 5,
@@ -67,9 +42,6 @@ Ball = {
     x = VIRTUAL_WIDTH / 2 - BallDimensions.width / 2,
     y = VIRTUAL_HEIGHT / 2 - BallDimensions.height / 2
 }
-
--- End Challenge
-]]--
 
 --[[
     Runs when the game first starts up, only once; used to initialize the game.
@@ -124,9 +96,7 @@ function love.draw()
     --
 
     -- Challenge: Render paddles and ball from table data.
-
-    
-    --[[ CODEAR 
+    --[[ TODO
     -- render first paddle (left side)
     love.graphics.rectangle(LeftPaddle.mode, LeftPaddle.x, LeftPaddle.y, LeftPaddle.dimensions.width, LeftPaddle.dimensions.height)
 
@@ -137,7 +107,8 @@ function love.draw()
     love.graphics.rectangle(Ball.mode, Ball.x, Ball.y, Ball.dimensions.width, Ball.dimensions.height)
 
     -- End Challenge
-]]--
+    ]]--
+
     -- end rendering at virtual resolution
     push:apply('end')
 end

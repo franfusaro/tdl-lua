@@ -10,7 +10,6 @@ function ej_f()
 end
 
 --[[ Codear
-
 function ej_funcion()
     a = print
     a("Hola")
@@ -27,6 +26,13 @@ end
 ]]--
 
 function main()
+    --
+    --
+    --
+    ej_f()
+    ej_funcion()
+    print(suma_y_mult(1,5))
+
 end
 
 main()

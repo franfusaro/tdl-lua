@@ -1,0 +1,37 @@
+NOTAS:
+
+mostrar en una diapositiva:
+	-tipado
+	-asignacion
+
+---NICO
+live:
+	-hello world
+	-functions
+	-tablas
+---FRAN
+	PONG-0:
+		-explicar el ciclo de juego
+		-mencionar lib push
+		-mostrar y codear la funcion keypressed()
+		-mostrar y codear el update del frame anterior en pantalla
+	PONG-1
+		-mencionar lib graphics
+		-mostrar y codear los paddles y la pelota, tomando valores de la tabla.
+		-mostrar la facilidad del uso de las tablas
+
+---NICO
+	PONG-2:
+		-codear diferencia entre keypressed() y isDown() de la entrada del teclado.
+		-movimiento de los paddles
+		-se agrega la tecla enter para que se mueva la bola.
+	PONG-3:
+		-se agrega la lib class
+		-se cambian las 'tablas a clases'
+		-explicar para las colisiones un poco del juego en 2D.
+		-mostrar y codear en las collisiones, y mostrar como aumenta el puntaje y el saque y se resetea la Bola
+
+---FRAN
+	-metatablas ( DESPUES DEL PONG)
+---
+

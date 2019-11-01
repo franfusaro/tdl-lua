@@ -6,7 +6,7 @@ function ej_or_and()
     print(nil and 13)      --> nil
     print(false and 13)    --> false
     print(4 or 5)          --> 4
-    print(false or 5)      --> 5
+    print(false or 5,'\n')      --> 5
 
     v = nil
     x = v or 8
@@ -21,7 +21,7 @@ function ej_or_and()
     b = 5
     c =10
     v = ((a and b) or c)
-    print(v)
+    print(v,'\n')
 end
 
 function ej_asignacion_mult()
@@ -34,7 +34,9 @@ function ej_asignacion_mult()
 end
 
 function main()
-    ej_if()
+    --ej_if()
+    ej_or_and()
+    ej_asignacion_mult()
 end
 
 main()

@@ -1,25 +1,3 @@
---[[
-    GD50 2018
-    Pong Remake
-
-    pong-5
-    "The Class Update"
-
-    -- Main Program --
-
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
-
-    Originally programmed by Atari in 1972. Features two
-    paddles, controlled by players, with the goal of getting
-    the ball past your opponent's edge. First to 10 points wins.
-
-    This version is built to more closely resemble the NES than
-    the original Pong machines or the Atari 2600 in terms of
-    resolution, though in widescreen (16:9) so it looks nicer on 
-    modern systems.
-]]
-
 -- push is a library that will allow us to draw our game at a virtual
 -- resolution, instead of however large our window is; used to provide
 -- a more retro aesthetic
@@ -55,7 +33,13 @@ PADDLE_SPEED = 200
     Runs when the game first starts up, only once; used to initialize the game.
 ]]
 function love.load()
+    -- set love's default filter to "nearest-neighbor", which essentially
+    -- means there will be no filtering of pixels (blurriness), which is
+    -- important for a nice crisp, 2D look
     love.graphics.setDefaultFilter('nearest', 'nearest')
+
+    -- set the title of our application window
+    love.window.setTitle('Pong')
 
     -- "seed" the RNG so that calls to random are always random
     -- use the current time, since that will vary on startup every time
@@ -64,15 +48,30 @@ function love.load()
     -- more "retro-looking" font object we can use for any text
     smallFont = love.graphics.newFont('font.ttf', 8)
 
-    -- set LÖVE2D's active font to the smallFont object
+    -- larger font for drawing the score on the screen
+    scoreFont = love.graphics.newFont('font.ttf', 32)
+
+    --TODO agregar imagen player1 ferrigno vs player2 scarpinelli
+    -- love.graphics.draw('leo.png', x1, y1)
+    -- love.graphics.draw('ari.png', x2, y2)
+    player1Image = love.graphics.newImage('lua.png')
+    player2Image = love.graphics.newImage('lua.png')
+
+
+    -- set LÖVE2D's active font to the smallFont obect
     love.graphics.setFont(smallFont)
 
     -- initialize window with virtual resolution
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
-        resizable = true,
+        resizable = false,
         vsync = true
     })
+
+    -- initialize score variables, used for rendering on the screen and keeping
+    -- track of the winner
+    player1Score = 0
+    player2Score = 0
 
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
@@ -88,11 +87,78 @@ function love.load()
     gameState = 'start'
 end
 
+function detectPlayerCollisions()
+    -- detect ball collision with paddles, reversing dx if true and
+    -- slightly increasing it, then altering the dy based on the position of collision
+    if ball:collides(player1) then
+        ball.dx = -ball.dx * 1.03
+        --This is for the next frame so it doesnt detect collision again
+        ball.x = player1.x + 5 
+
+        -- keep velocity going in the same direction, but randomize it
+        if ball.dy < 0 then
+            ball.dy = -math.random(10, 150)
+        else
+            ball.dy = math.random(10, 150)
+        end
+    end
+    if ball:collides(player2) then
+        ball.dx = -ball.dx * 1.03
+        ball.x = player2.x - 4
+
+        -- keep velocity going in the same direction, but randomize it
+        if ball.dy < 0 then
+            ball.dy = -math.random(10, 150)
+        else
+            ball.dy = math.random(10, 150)
+        end
+    end
+end
+
+function detectBoundsCollisions()
+    -- detect upper and lower screen boundary collision and reverse if collided
+
+    --[[ TODO ]]--
+    if ball.y <= 0 then
+        ball.y = 0
+        ball.dy = -ball.dy
+    end
+
+    if ball.y >= VIRTUAL_HEIGHT - ball.width then
+        ball.y = VIRTUAL_HEIGHT - ball.width
+        ball.dy = -ball.dy
+    end
+    if ball.x < 0 then
+        servingPlayer = 1
+        player2Score = player2Score + 1
+        gameState = 'serve'
+        ball:reset()
+    elseif ball.x > VIRTUAL_WIDTH then
+        servingPlayer = 2
+        player1Score = player1Score + 1
+        gameState = 'serve'
+        ball:reset()
+    end
+    --[[ ]]--
+end
+
 --[[
     Runs every frame, with "dt" passed in, our delta in seconds 
     since the last frame, which LÖVE2D supplies us.
 ]]
 function love.update(dt)
+    if gameState == 'serve' then
+        ball.dy = math.random(-50, 50)
+        if servingPlayer == 2 then
+            ball.dx = -math.random(140, 200)
+        elseif servingPlayer == 1 then
+            ball.dx = math.random(140, 200)
+        end
+    end
+    if gameState == 'play' then
+        detectPlayerCollisions()
+        detectBoundsCollisions()
+    end
     -- player 1 movement
     if love.keyboard.isDown('w') then
         player1.dy = -PADDLE_SPEED
@@ -133,7 +199,7 @@ function love.keypressed(key)
     -- if we press enter during the start state of the game, we'll go into play mode
     -- during play mode, the ball will move in a random direction
     elseif key == 'enter' or key == 'return' then
-        if gameState == 'start' then
+        if gameState == 'start' or gameState == 'serve' then
             gameState = 'play'
         else
             gameState = 'start'
@@ -159,11 +225,28 @@ function love.draw()
     -- draw different things based on the state of the game
     love.graphics.setFont(smallFont)
 
-    if gameState == 'start' then
-        love.graphics.printf('Hello Start State!', 0, 20, VIRTUAL_WIDTH, 'center')
+    if gameState == 'start'  or gameState == 'serve' then
+        love.graphics.printf('Pong! Press enter to serve.', 0, 20, VIRTUAL_WIDTH, 'center')
     else
-        love.graphics.printf('Hello Play State!', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Playing a round!', 0, 20, VIRTUAL_WIDTH, 'center')
     end
+
+    -- draw score on the left and right center of the screen
+    -- need to switch font to draw before actually printing
+    love.graphics.setFont(scoreFont)
+    love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, 
+        VIRTUAL_HEIGHT / 3)
+    love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30,
+        VIRTUAL_HEIGHT / 3)
+
+    --TODO add player images.
+    actual_x1, actual_y1 = player1Image:getDimensions()
+    actual_x2, actual_y2 = player2Image:getDimensions()
+    x1,x2= (VIRTUAL_WIDTH / 2 - 50), (VIRTUAL_WIDTH / 2 + 30)
+    y1,y2= (VIRTUAL_HEIGHT / 6), (VIRTUAL_HEIGHT / 6)
+
+    love.graphics.draw(player1Image, x1, y1,0, 36/actual_x1, 36/actual_y1)
+    love.graphics.draw(player2Image, x2, y2,0, 36/actual_x2, 36/actual_y2)
 
     -- render paddles, now using their class's render method
     player1:render()
@@ -172,6 +255,19 @@ function love.draw()
     -- render ball using its class's render method
     ball:render()
 
+    -- new function just to demonstrate how to see FPS in LÖVE2D
+    displayFPS()
+
     -- end rendering at virtual resolution
     push:apply('end')
+end
+
+--[[
+    Renders the current FPS.
+]]
+function displayFPS()
+    -- simple FPS display across all states
+    love.graphics.setFont(smallFont)
+    love.graphics.setColor(0, 255, 0, 255)
+    love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 10, 10)
 end

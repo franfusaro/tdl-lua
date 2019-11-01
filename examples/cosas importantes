@@ -1,3 +1,28 @@
+Lua salio de un laboratorio academico como un software para usar en una casa, pero se rapidamente se expandio a la industria.
+Se caracteriza por su:
+- Simpleza: Por su simpleza y por su simpleza escrita en C
+- Eficiente: Usa un compilador de una pasada rápido que permite una rapida compilación y tambien una rapida máquina virtual que permite su ejecución.
+- Portable: Puede correr en varias plataformas gracias a su ANSI C/C++ implementacion evitando usar librerias extrañas.
+- Embebido: Es un lenguaje "extendible", se usa mucho para agregar scripts en programas grandes, y tambièn hay que destacar su C API.
+
+Lua es dinamicamente tipado, posee solo 8 tipos:
+"nil",
+"boolean",
+"integer", -> double in C.
+"string",
+"table", -> pueden contener cualquier valor.
+"function",
+"userdata", -> punteros. como en C.
+"threads" -> corrutinas, tienen su propio stack, propias local vars y su propio instruction pointer. lo demas lo comparte con otras coroutines
+
+Tables: unica estructura de datos, son arreglos variables y asociativos(indexado por cualquier valor y que contenga cualquier valor).
+Estan implementadas mitad un hash y mitad un array, asi las tablas que esten indexadas por un integer, no necesitan un hash
+y la mitad del array ocupa la mitad en memoria de lo que ocuparia el hash ya que las ´key´ estan implicitas ahi y lo estarian explicitas en el hash.
+
+###########
+----------------
+###########
+
 Cada pieza que ejecuta lua es un chunk. Un chunk es una secuencia de statements.
 Se puede usar punto y coma al final de cada statement pero no es necesario.
 Tiene un interprete interactivo.
@@ -7,12 +32,12 @@ Las variables globales no necesitan declaracion. Acceder a una variable no decla
 Lua es case sensitive, por ejemplo and es reservado pero And y AND no.
 Comentarios con --[[ y ]]--
 Tiene tipado dinamico (no hay definiciones de tipo, cada valor tiene su propio tipo). 
-El tipo number represetnta numeros reales (floats de doble precision)
-El tipo string puede contener cualquier caracter (con cualq. valor numerico) por lo que puede contener data binaria. También son valores inmutables, no podes cambiar un caracter adentro de un string (como si podrias en C) por lo que al intentarlo se crea otro string. Tienen la ventaja agregada de que su memoria es manejada automaticamente.
-Los strings pueden comenzar con ", ' o [[, siendo este ultimo el que no tiene en cuenta caracteres de escape ni.
-saltos del inea.
+El tipo number representa numeros reales (floats de doble precision)
+El tipo string puede contener cualquier caracter (con cualq. valor numerico) por lo que puede contener data binaria.
+Son valores inmutables, no podes cambiar un caracter adentro de un string (como si podrias en C) por lo que al intentarlo se crea otro string. Tienen la ventaja agregada de que su memoria es manejada automaticamente.
+Los strings pueden comenzar con ", ' o [[, siendo este ultimo el que no tiene en cuenta caracteres de escape ni saltos de linea.
 Strings se concatenan con ..
-El tipo tabla esta implementado con arrays asociativos (pueden tener cualquier cosa como indice). y son dinamicas y son la unica estructura de datos. Estas son objetos a los cuales se mantienen referencias.
+El tipo tabla esta implementado con arrays asociativos (pueden tener cualquier cosa como indice), son dinamicas y son la unica estructura de datos. Estas son objetos a los cuales se mantienen referencias.
 Para representar records se pueden usar tablas y su azucar sintactico dice que a["x"] es igual a hacer a.x
 Los arrays empiezan en 1 (!!!!!!!!!!!!)
 Las funciones son valores de primera clase por lo que se las puede guardar en variables y pasarlas como argumentos a otras funciones (tambien retornarlas desde funciones). 
@@ -67,6 +92,7 @@ opnames = {["+"] = "add", ["-"] = "sub",
     a = {[i+0] = s, [i+1] = s..s, [i+2] = s..s..s}
     
     print(opnames[s])    --> sub
+    print(a[20])         --> -
     print(a[22])         --> ---
 
 3. Statements:
@@ -84,25 +110,25 @@ Local Variables and Blocks
 Existe el identificador "local" para las variables que quedan dentro del scope del bloque donde estan declaradas. Su acceso es mas rapido que a las globales.
 
 4. Control Structures
-if, elseif y else ... end
-while ... end
+if, elseif y else <cond> then ... end
+while <cond> do ... end
 repeat ... until
-for ... end
+for <cond> do ... endl
 	dos variantes del for
 	for numerico:
 	for var=exp1, exp2, exp3 do ... end
 	Ejecuta algo para cada valor desde exp1 a exp2 usando exp3 como step. Estas expresiones solo se evaluan una vez al comienzo del loop. La variable "var" es local implicitamente.
 	
 	for generico:
-	for i,v in ipairs(a) do ... end
+	for i,v in pairs(a) do ... end
 	Recorre todos los valores devueltos por un iterador. i obtiene el indice y v el valor asociado.
 
 	
 Break and Return
 
 5. Functions
-Las funciones son el principal mecanismo de abstraccion de statments. Estas pueden llevar a cabo una tarea específica (lo que a veces se llama procedimiento o subrutina en otros idiomas) o calcular y devolver valores. En el primer caso son statements, en el segundo caso son expresiones.
-Si tienen un solo argumento se pueden obviar los parentesis.
+Las funciones son el principal mecanismo de abstraccion de statments. Estas pueden llevar a cabo una tarea específica (lo que a veces se llama procedimiento o subrutina en otros idiomas) o calcular y devolver valores.
+En el primer caso son statements, en el segundo caso son expresiones. Si tienen un solo argumento se pueden obviar los parentesis.
 También, azucar sintactico, para object oriented calls se puede hacer o:foo(x) en lugar de o.foo(o, x)
 Las funciones pueden estar definidas en Lua o en C (no hay diferencia al llamarlas).
 Lua permite utilizar las llamadas a las funciones sin pasar todos los parametros (y si pasamos parametros de mas los descarta). Por ejemplo, si tenemos:
@@ -198,6 +224,13 @@ Ejemplo:
       return (a.name > b.name)
     end)
 
+    for k1,v1 in pairs(network) do
+	    for k2,v2 in pairs(v1) do
+		    print(v2,"\n")
+	    end
+    end
+
+
 Clausuras.
 
 Ejemplos:
@@ -279,9 +312,11 @@ Iterators with complex state
 
 Es lenguaje interpretado pero tiene su parte de compilación (funcion loadstring, dofile y no se que mas)
 
-Tiene función Require que primero busca el archivo en el path y luego chequea si ya fue corrido anteriormente (evita duplicar el trabajo). Este no trabaja como los require de otros lenguajes si no que lo hace mediante patterns (porque trabaja en base a ANSI C) por lo que existe una variable donde se especifican los paths con dichos patrones.
+Tiene función Require que primero busca el archivo en el path y luego chequea si ya fue corrido anteriormente (evita duplicar el trabajo).
+No es como los otros lenguajes si no que lo hace mediante patterns (porque trabaja en base a ANSI C) por lo que existe una variable donde se especifican los paths con dichos patrones.
 
-Se puede incluir paquetes de C mediante la función loadlib() pero esto se tiene que especificar con codigo para cada plataforma (si es windows carga una dll, si es linux carga un .so por ejemplo) y esta función no inicializa la librería si no que nos devuelve una función de Lua para hacerlo.
+Se puede incluir paquetes de C mediante la función loadlib() pero esto se tiene que especificar con codigo para cada plataforma
+(si es windows carga una dll, si es linux carga un .so por ejemplo) y esta función no inicializa la librería si no que nos devuelve una función de Lua para hacerlo.
 Ejemplo:
 local path = "/usr/local/lua/lib/libluasocket.so"
 -- or path = "C:\\windows\\luasocket.dll"
@@ -303,11 +338,13 @@ end
 
 Tambien se puede utilizar esto con funciones anonimas.
 Esta función devuelve true y el return de la función en caso de éxito. Si no falso y el mensaje de error.
-El problema es que esto nos destruye el stack y no nos deja hacer un traceback, para hacer traceback hay que correr una función antes (xpcall()) a la cual le pasamos un error handler y ahi en el error handler hacer algo para implementar traceback.
+El problema es que esto nos destruye el stack y no nos deja hacer un traceback, para hacer traceback hay que correr una función antes (xpcall())
+a la cual le pasamos un error handler y ahi en el error handler hacer algo para implementar traceback.
 
 Coroutines
 Toda la funcionalidad esta en la tabla "coroutine".
-Se crean con la función create y tienen tres estados: Suspended, running y dead. Inicialmente están en estado suspended y hay que ejecutar el resume para que pasen a running. Si tratamos de correr resume en una coroutine dead, esta nos devuelve false (corre con pcall).
+Se crean con la función create y tienen tres estados: Suspended, running y dead. Inicialmente están en estado suspended y hay que ejecutar el resume para que pasen a running.
+Si tratamos de correr resume en una coroutine dead, esta nos devuelve false (corre con pcall).
 
 co = coroutine.create(function ()
            print("hi")
@@ -324,7 +361,8 @@ co = coroutine.create(function (a,b)
  end)
 print(coroutine.resume(co, 20, 10))  --> true  30  10
 
-La diferencia con otros lenguajes es que Lua ofrece lo que los autores llaman "asymetric coroutines" dado que tienen una funcion para suspender y otra para resumir mientras que los demas lenguajes suelen tener "simetric coroutines" porque solo ofrecen para suspender.
+La diferencia con otros lenguajes es que Lua ofrece lo que los autores llaman "asymetric coroutines" dado que tienen una funcion para suspender y otra para resumir
+Mientras que los demas lenguajes suelen tener "simetric coroutines" porque solo ofrecen para suspender.
 
 Las corutinas nos permiten hacer una especie de "pipes and filters" dada la propiedad de tener ambos yield y resume como posibilidades.
 Ejemplo de productor/consumidor con filtro:
@@ -372,6 +410,16 @@ function producer()
 end
 
 consumer(producer())
+
+--[[ SLEEP FUNCTION
+
+function sleep(n)
+  local sec = tonumber(os.clock() + n)
+  while (os.clock() < sec) do
+  end
+end
+
+]]--
 
 Existe una función coroutine.wrap que lo que hace es devolvernos una función que al llamarla realizar el resume de la corutina. --> Es menos flexible que el create/resume y ademas raisea los errores en lugar de devolverlos.
 Las corutinas no pueden ser preempted!! Hay formas de evitarlo por ejemplo para descargas de archivos.

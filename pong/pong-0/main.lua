@@ -37,13 +37,11 @@ end
 ]]
 function love.keypressed(key)
     -- keys can be accessed by string name
-    --[[ CODEAR 
-    -- Challenge: Escape or q to quit, c to increment a counter.
+    --[[ TODO
+    -- Challenge: Escape or q to quit
     if key == 'escape' or key == 'q' then
         -- function LÖVE gives us to terminate application
         love.event.quit()
-    elseif key == 'c' then
-        counter = counter + 1
     end
     -- END CHALLENGE
     ]]--
@@ -60,26 +58,21 @@ function love.draw()
     -- condensed onto one line from last example
     -- note we are now using virtual width and height now for text placement
 
-    --[[ CODEAR 
--- Challenge hello pong con counter..   
-    love.graphics.printf('Hello Pong! Counter is in number ' .. counter , 0, VIRTUAL_HEIGHT / 2 - 6, VIRTUAL_WIDTH, 'center')
--- End challenge
---]]
-
-    --[[ CODEAR 
--- Challenge last frame duration
+    -- Challenge last frame duration
+    --[[ TODO
     love.graphics.printf('El ultimo frame duro: ' .. lastFrameDt, 0, 10, VIRTUAL_WIDTH, 'center')
--- End challenge
---]]
+    --]]
+    -- End challenge
+
     -- end rendering at virtual resolution
     push:apply('end')
 end
 
-    --[[ CODEAR 
 -- Challenge Last Frame Duration
+--[[ TODO
 lastFrameDt = 0
 function love.update(dt)
     lastFrameDt = dt
 end
---End challenge
 --]]
+--End challenge

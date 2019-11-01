@@ -108,7 +108,7 @@ function ej_2()
     end
     
     --[[ CODEAR
-    
+    ]]--
     Window.mt.__index = function (table, key)
         return Window.prototype[key]
     end
@@ -126,7 +126,13 @@ function ej_2()
     
     
     w.test = 21
-    print(w.test)     --> 441
-     ]]--
+    print(w.test)     --> 441   (=21^2)
+
+    w.tdl = "hola"
+    print(w.tdl)
+    --[[
+    ]]--
 
 end
+
+ej_2()

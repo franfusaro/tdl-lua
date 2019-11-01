@@ -18,7 +18,7 @@ end
 function ej_3()
     --[[ Codear
     t = { 10, 5, 3, 9 }
-    for k,v in ipairs(t) do
+    for k,v in pairs(t) do
         local count = 0
         count = count + 1
         print(k, v, count)
