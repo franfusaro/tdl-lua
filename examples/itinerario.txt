@@ -7,8 +7,21 @@ PARA QUE:
 POR QUE:
     {}
 
+MOSTRAR_BASICOS:
+    HELLO WORLD
+    {}
+    TIPOS
+    {}
+    ASIGNACION
+    {}
+    COROUTINES
+    {}
+
 EJEMPLOS BASICOS:
-    {NICO}
+    FUNCTIONS
+    {}
+    TABLES
+    {}
 
 EXPLICACION LOVE2D:
     {}
@@ -23,16 +36,13 @@ EJEMPLO PONG-3
     {NICO}
 
 METATABLAS EXPLICACION
-    {}
+    {FRAN}
 
 EJEMPLO METATABAS
-    {}
+    {FRAN}
 
 LUA VS. RUBY
     {}
-
-EXPLICACION DE ALGO
-    {BRIAN}
 
 EJEMPLO INTEGRADOR
     {BRIAN}

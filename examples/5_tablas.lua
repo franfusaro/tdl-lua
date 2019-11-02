@@ -38,7 +38,7 @@ function ej_1()
     t = {}
     b = t
     t["x"] = 10
-    t.y = 5
+    b.y = 5
     print(t.x)
     print(b.x)
 

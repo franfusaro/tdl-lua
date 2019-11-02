@@ -1,8 +1,10 @@
 NOTAS:
 
 mostrar en una diapositiva:
+	-hello world
 	-tipado
 	-asignacion
+	-coroutine
 
 ---NICO
 live:
@@ -35,3 +37,9 @@ live:
 	-metatablas ( DESPUES DEL PONG)
 ---
 
+--Brian
+Mostrar primero ejemplo y explicar el funcionamiento basico del ejemplo basico (SIn random)
+Mostrar diferencia entre hurt y hitboxes
+Descomentar lineas
+Codear funcion del objeto que abre la puerta
+Mostrar random de mapa
