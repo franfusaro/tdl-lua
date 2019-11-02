@@ -48,7 +48,7 @@ end
 function Room:generateEntities()
     local types = {'skeleton', 'slime', 'bat', 'ghost', 'spider'}
 
-    for i = 1, 10 do
+    for i = 1, 1 do
         local type = types[math.random(#types)]
 
         table.insert(self.entities, Entity {
