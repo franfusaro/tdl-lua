@@ -90,9 +90,7 @@ end
 ]]
 function love.update(dt)
 
-    -- Challenge update players movement
     --[[ TODO
-
     -- player 1 movement
     if love.keyboard.isDown('w') then
         -- add negative paddle speed to current Y scaled by deltaTime
@@ -110,9 +108,8 @@ function love.update(dt)
         -- add positive paddle speed to current Y scaled by deltaTime
         RightPaddle.y = math.min(VIRTUAL_HEIGHT - PaddleDimensions.height, RightPaddle.y + PADDLE_SPEED * dt)
     end
-
     ]]--
-    -- End Challenge
+
     if gameState == 'play' then
         Ball.x = Ball.x + Ball.xVelocity * dt
         Ball.y = Ball.y + Ball.yVelocity * dt

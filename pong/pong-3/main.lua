@@ -51,12 +51,8 @@ function love.load()
     -- larger font for drawing the score on the screen
     scoreFont = love.graphics.newFont('font.ttf', 32)
 
-    --TODO agregar imagen player1 ferrigno vs player2 scarpinelli
-    -- love.graphics.draw('leo.png', x1, y1)
-    -- love.graphics.draw('ari.png', x2, y2)
-    player1Image = love.graphics.newImage('lua.png')
-    player2Image = love.graphics.newImage('lua.png')
-
+    player1Image = love.graphics.newImage('ferrigno.jpeg')
+    player2Image = love.graphics.newImage('ari.jpeg')
 
     -- set LÖVE2D's active font to the smallFont obect
     love.graphics.setFont(smallFont)
@@ -239,7 +235,6 @@ function love.draw()
     love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30,
         VIRTUAL_HEIGHT / 3)
 
-    --TODO add player images.
     actual_x1, actual_y1 = player1Image:getDimensions()
     actual_x2, actual_y2 = player2Image:getDimensions()
     x1,x2= (VIRTUAL_WIDTH / 2 - 50), (VIRTUAL_WIDTH / 2 + 30)
