@@ -1,42 +1,35 @@
+--simple hello world
+print("Hello World!\n")
 
-function f(a, b) 
-    return a or b 
+function foo1(a,b)
+    print(a,b)
 end
 
-function ej_f()
-    print(f(3)) --> a = 3, b = nil
-    print(f(3, 4, 5)) --> a = 3, b = 4 (descarta 5)
+foo1(1)
+foo1(1,2)
+foo1(1,2,3)
+
+
+function imprimir(foo)
+    foo("hola tdl\n")
 end
 
---[[ Codear
-function ej_funcion()
-    a = print
-    a("Hola")
-    imprimir_con_nombre(print)
+imprimir(print)
+imprimir(io.write)
+
+function foo3()
+    a=print
+    a("casi terminamos con las funciones en lua\n")
 end
 
-function imprimir_con_nombre(fun)
-    fun("Hola Manuel!")
-end
+foo3()
 
-
-function foo(...)
-    local var1 = 0;
-    for key,value in pairs {...} do
-        var1 = var1 + value
+function ultima(...)
+    local contador=0
+    for k,v in pairs{...} do
+        contador = contador+1
     end
-    return var1
-end
-]]--
-
-function main()
-    --
-    --
-    --
-    ej_f()
-    ej_funcion()
-    print(foo(1,2,3,4,5,6,7,8,9))
-
+    print('contador quedo en: ', contador,'\n')
 end
 
-main()
+ultima(1,2,3,4,5,6,7,'hola','chau')

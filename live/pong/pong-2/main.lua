@@ -90,25 +90,12 @@ end
 ]]
 function love.update(dt)
 
-    --[[ TODO
+    -- TODO add movement to paddles. Right & Left
     -- player 1 movement
-    if love.keyboard.isDown('w') then
-        -- add negative paddle speed to current Y scaled by deltaTime
-        LeftPaddle.y = math.max(0, LeftPaddle.y + -PADDLE_SPEED * dt)
-    elseif love.keyboard.isDown('s') then
-        -- add positive paddle speed to current Y scaled by deltaTime
-        LeftPaddle.y = math.min(VIRTUAL_HEIGHT - PaddleDimensions.height, LeftPaddle.y + PADDLE_SPEED * dt)
-    end
+
 
     -- player 2 movement
-    if love.keyboard.isDown('up') then
-        -- add negative paddle speed to current Y scaled by deltaTime
-        RightPaddle.y = math.max(0, RightPaddle.y + -PADDLE_SPEED * dt)
-    elseif love.keyboard.isDown('down') then
-        -- add positive paddle speed to current Y scaled by deltaTime
-        RightPaddle.y = math.min(VIRTUAL_HEIGHT - PaddleDimensions.height, RightPaddle.y + PADDLE_SPEED * dt)
-    end
-    ]]--
+
 
     if gameState == 'play' then
         Ball.x = Ball.x + Ball.xVelocity * dt

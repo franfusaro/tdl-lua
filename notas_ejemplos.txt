@@ -27,7 +27,6 @@ live:
 	PONG-2:
 		-codear diferencia entre keypressed() y isDown() de la entrada del teclado.
 		-movimiento de los paddles
-		-se agrega la tecla enter para que se mueva la bola.
 	PONG-3:
 		-se agrega la lib class
 		-se cambian las 'tablas a clases'

@@ -114,28 +114,12 @@ end
 function detectBoundsCollisions()
     -- detect upper and lower screen boundary collision and reverse if collided
 
-    --[[ TODO
-    if ball.y <= 0 then
-        ball.y = 0
-        ball.dy = -ball.dy
-    end
+    -- TODO: add collisions
 
-    if ball.y >= VIRTUAL_HEIGHT - ball.width then
-        ball.y = VIRTUAL_HEIGHT - ball.width
-        ball.dy = -ball.dy
-    end
-    if ball.x < 0 then
-        servingPlayer = 1
-        player2Score = player2Score + 1
-        gameState = 'serve'
-        ball:reset()
-    elseif ball.x > VIRTUAL_WIDTH then
-        servingPlayer = 2
-        player1Score = player1Score + 1
-        gameState = 'serve'
-        ball:reset()
-    end
-    ]]--
+
+    --TODO: update score, serving (1 or 2), change state game, reset ball
+
+
 end
 
 --[[
